@@ -4,17 +4,35 @@
 
 SELECT * FROM fact_environmental_impact;
 
+-- Lo primero que realizamos es una consulta de duplicados
+SELECT food_product,
+COUNT(*) FROM staging_food
+GROUP BY food_product
+HAVING COUNT(*)>1;
+
 /* ==========================================================
--- 1. ¿Cuántos alimentos contiene el dataset?
+-- ¿Cuántos alimentos contiene el dataset?
 ============================================================*/
 
 SELECT COUNT(*) AS total_foods
 FROM fact_environmental_impact;
 
 --------------------------------------------------------------
+-- ==========================================================
+-- LEFT JOIN
+-- Verifica si existen categorías sin alimentos asociados.
+-- ==========================================================
+
+SELECT
+	c.category_name,
+	COUNT(f.fact_id) total_products
+FROM dim_category c
+LEFT JOIN fact_environmental_impact f ON c.category_id=f.category_id
+GROUP BY c.category_name;
+--------------------------------------------------------------
 
 /* ==========================================================
--- 2. ¿Qué alimento genera más emisiones de CO₂?
+-- 1. ¿Qué alimento genera más emisiones de CO₂?
 ============================================================*/
 
 SELECT
@@ -30,8 +48,8 @@ DESC LIMIT 10;
 --------------------------------------------------------------
 
 /* ==========================================================
--- 3. Emisiones medias por categoría
-¿Qué categoría de alimentos genera más emisiones de CO₂?
+-- 2. Emisiones medias por categoría
+¿Qué categoría produce un mayor impacto ambiental?
 ============================================================*/
 
 SELECT
@@ -47,7 +65,8 @@ ORDER BY average_emissions DESC;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 4. Emisiones medias de CO₂ según el origen del alimento
+-- 3. Emisiones medias de CO₂ según el origen del alimento
+-- ¿Qué origen (animal o vegetal) genera más emisiones?
 -- ==========================================================
 
 SELECT
@@ -62,7 +81,7 @@ ORDER BY average_total_emissions DESC;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 5. Número de alimentos según nivel de sostenibilidad
+-- 4. ¿Qué número de alimentos pertenece a cada nivel de sostenibilidad?
 -- ==========================================================
 
 SELECT
@@ -76,7 +95,7 @@ ORDER BY total_foods DESC;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 6. TOP 5 alimentos con mayores emisiones derivadas del transporte
+-- 5. ¿Qué 5 alimentos generan más emisiones durante el transporte?
 -- ==========================================================
 
 SELECT
@@ -91,7 +110,7 @@ LIMIT 5;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 7. Alimentos con emisiones superiores a la media
+-- 6. ¿Qué alimentos presentan emisiones superiores a la media del conjunto?
 -- ==========================================================
 
 SELECT
@@ -113,7 +132,7 @@ ORDER BY f.total_emissions DESC;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 8. Ranking de emisiones (Función ventana)
+-- 7. ¿Cuál es el ranking de alimentos según emisiones totales?
 -- ==========================================================
 
 SELECT
@@ -131,7 +150,7 @@ INNER JOIN dim_product p ON f.product_id = p.product_id;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 9. ¿Qué alimentos deben gran parte de su impacto ambiental al transporte y cuáles a la producción?
+-- 8. ¿Qué alimentos deben gran parte de su impacto ambiental al transporte y cuáles a la producción?
 -- ==========================================================
 
 SELECT
@@ -148,22 +167,7 @@ ORDER BY transport_percentage DESC;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 10. LEFT JOIN
---
--- Verifica si existen categorías sin alimentos asociados.
--- ==========================================================
-
-SELECT
-	c.category_name,
-	COUNT(f.fact_id) total_products
-FROM dim_category c
-LEFT JOIN fact_environmental_impact f ON c.category_id=f.category_id
-GROUP BY c.category_name;
-
---------------------------------------------------------------
-
--- ==========================================================
--- 11. Top 5 alimentos con mayores emisiones del procesado
+-- 9. ¿Qué 5 alimentos generan más emisiones durante el procesado?
 -- ==========================================================
 
 SELECT
@@ -178,7 +182,7 @@ LIMIT 5;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 11. ¿Qué fase de producción genera más emisiones?
+-- 10. ¿Qué fase de producción genera más emisiones?
 -- ==========================================================
 
 SELECT
@@ -198,7 +202,7 @@ FROM fact_environmental_impact;
 --------------------------------------------------------------
 
 -- ==========================================================
--- 13. Media global de emisiones
+-- 11. Media global de emisiones
 -- ==========================================================
 
 SELECT

@@ -2,7 +2,7 @@
 
 Este proyecto tiene como objetivo diseñar e implementar una base de datos relacional en SQL para analizar el impacto ambiental asociado a la producción de diferentes alimentos.
 
-A partir de un conjunto de datos público procedente de Kaggle, se construye un modelo dimensional en estrella compuesto por una tabla de hechos y varias tablas de dimensiones, permitiendo responder preguntas de negocio mediante consultas SQL.
+A partir de un conjunto de datos público procedente de Kaggle, se construye un modelo dimensional en estrella compuesto por una tabla de hechos y varias tablas de dimensiones, permitiendo responder preguntas de negocio mediante consultas SQL. (https://www.kaggle.com/datasets/selfvivek/environment-impact-of-food-production)
 
 ---
 

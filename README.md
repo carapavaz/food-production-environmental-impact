@@ -1,7 +1,5 @@
 # 🌱 Food Production Environmental Impact | SQL Relational Database Project
 
-## Carmen Aparicio Vázquez
-
 Este proyecto tiene como objetivo diseñar e implementar una base de datos relacional en SQL para analizar el impacto ambiental asociado a la producción de diferentes alimentos.
 
 A partir de un conjunto de datos público procedente de Kaggle, se construye un modelo dimensional en estrella compuesto por una tabla de hechos y varias tablas de dimensiones, permitiendo responder preguntas de negocio mediante consultas SQL.
@@ -68,11 +66,11 @@ Contiene todas las métricas ambientales.
 
 ## Tablas de dimensiones
 
-* dim_product
-* dim_category
-* dim_origin
-* dim_system
-* dim_sustainability
+* dim_product - Una fila por alimento
+* dim_category - Clasifica los alimentos según tipo
+* dim_origin -  Clasifica los alimentos según origen
+* dim_system - Clasifica los alimentos según sistema de producción
+* dim_sustainability - Clasifica cada alimento según el nivel de emisiones de CO₂
 
 Este modelo permite separar la información descriptiva de las métricas cuantitativas, facilitando tanto el mantenimiento como el análisis posterior.
 
@@ -95,89 +93,7 @@ Contiene las métricas:
 * retail
 * packaging
 
-además de las claves foráneas que enlazan con las dimensiones.
-
----
-
-## dim_product
-
-Una fila por alimento.
-
-Ejemplos:
-
-* Beef
-* Milk
-* Rice
-* Tomatoes
-
----
-
-## dim_category
-
-Agrupa los alimentos según su tipo.
-
-Ejemplos:
-
-* Meat
-* Dairy
-* Cereals
-* Fruit
-* Vegetables
-* Fish
-* Oils
-* Nuts
-
----
-
-## dim_origin
-
-Clasifica los alimentos según su origen.
-
-* Animal
-* Plant
-
----
-
-## dim_system
-
-Representa el sistema de producción.
-
-Actualmente todos los registros pertenecen al sistema convencional, aunque se ha diseñado esta dimensión pensando en futuras ampliaciones del proyecto.
-
----
-
-## dim_sustainability
-
-Clasifica cada alimento según el nivel de emisiones de CO₂.
-
-Los niveles utilizados son:
-
-* Low
-* Medium
-* High
-* Very High
-
-Esta clasificación no existe en el dataset original, sino que ha sido creada mediante una sentencia CASE utilizando las emisiones totales como criterio.
-
----
-
-# Decisiones de diseño
-
-Se ha optado por un modelo dimensional en estrella porque facilita el análisis mediante consultas SQL.
-
-Todas las dimensiones poseen claves primarias autoincrementales.
-
-La tabla de hechos almacena únicamente las claves foráneas y las métricas numéricas.
-
-Se han utilizado:
-
-* PRIMARY KEY para identificar cada registro.
-* FOREIGN KEY para garantizar la integridad referencial.
-* UNIQUE para evitar duplicados en las dimensiones.
-* NOT NULL en los campos obligatorios.
-* CHECK para impedir valores negativos en los indicadores ambientales.
-
-Además, se creó un índice sobre product_id para acelerar las consultas más frecuentes por alimento.
+Además de las claves foráneas que enlazan con las dimensiones.
 
 ---
 
@@ -237,23 +153,21 @@ Las consultas responden a preguntas de negocio como:
 
 3. ¿Qué origen (animal o vegetal) genera más emisiones?
 
-4. ¿Cuáles son los cinco alimentos con mayor consumo de agua?
+4. ¿Qué número de alimentos pertenece a cada nivel de sostenibilidad?
 
-5. ¿Qué alimentos generan más emisiones durante el transporte?
+5. ¿Qué 5 alimentos generan más emisiones durante el transporte?
 
-6. ¿Qué alimentos generan más emisiones durante el procesado?
+6. ¿Qué alimentos presentan emisiones superiores a la media del conjunto?
 
-7. ¿Qué porcentaje de alimentos pertenece a cada nivel de sostenibilidad?
+7. ¿Cuál es el ranking de alimentos según emisiones totales?
 
-8. ¿Qué alimentos presentan emisiones superiores a la media del conjunto?
+8. ¿Qué alimentos deben gran parte de su impacto ambiental al transporte y cuáles a la producción?
 
-9. ¿Cuál es el ranking de alimentos según emisiones totales?
+9. ¿Qué 5 alimentos generan más emisiones durante el procesado?
 
-10. ¿Qué categoría presenta el mayor promedio de emisiones?
+10. ¿Qué fase de producción genera más emisiones?
 
-11. ¿Cómo se distribuyen los alimentos según su origen y nivel de sostenibilidad?
-
-12. ¿Qué fase de producción concentra la mayor parte del impacto ambiental?
+11. ¿Cuál es la media global de emisiones?
 
 Estas consultas permiten obtener información útil para comprender qué alimentos tienen un mayor impacto ambiental y en qué etapas de producción se generan las mayores emisiones.
 

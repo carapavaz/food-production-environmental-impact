@@ -10,10 +10,6 @@
 -- 6. Insertar dim_sustainability
 -- 7. Insertar dim_system
 -- 8. FACT TABLE
--- UPDATE
--- DELETE
--- COMMIT
--- ROLLBACK 
 
 -- ----------------------------------------------------------------------------
 

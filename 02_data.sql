@@ -30,6 +30,14 @@ SELECT *
 FROM staging_food 
 LIMIT 5;
 
+-- PAra evitar duplicados:
+DELETE FROM fact_environmental_impact;
+DELETE FROM dim_product;
+DELETE FROM dim_category;
+DELETE FROM dim_origin;
+DELETE FROM dim_system;
+DELETE FROM dim_sustainability;
+
 -- =====================================================
 -- 2 TRANSACCIÓN
 -- =====================================================
@@ -40,7 +48,7 @@ BEGIN TRANSACTION;
 -- 3 DIMENSIÓN PRODUCTO (sale directamente del csv)
 -- =====================================================
 
-INSERT INTO dim_product (product_name)
+INSERT OR IGNORE INTO dim_product (product_name)
 
 SELECT DISTINCT food_product
 FROM staging_food
@@ -52,7 +60,7 @@ SELECT * FROM dim_product;
 -- 4 DIMENSIÓN CATEGORÍA (lo hacemos manualmente)
 -- =====================================================
 
-INSERT INTO dim_category(category_name)
+INSERT OR IGNORE INTO dim_category(category_name)
 
 VALUES
 ('Meat'),
@@ -72,7 +80,7 @@ SELECT * FROM dim_category;
 -- 5 DIMENSIÓN ORIGEN (lo hacemos manualmente)
 -- =====================================================
 
-INSERT INTO dim_origin(origin_name)
+INSERT OR IGNORE INTO dim_origin(origin_name)
 
 VALUES
 ('Animal'),
@@ -84,7 +92,7 @@ SELECT * FROM dim_origin;
 -- 6 DIMENSIÓN SISTEMA (SERÁ PARA TODOS IGUAL)
 -- =====================================================
 
-INSERT INTO dim_system(system_name)
+INSERT OR IGNORE INTO dim_system(system_name)
 
 VALUES
 ('Conventional');
@@ -95,7 +103,7 @@ SELECT * FROM dim_system;
 -- 7 DIMENSIÓN SUSTAINABILITY (clasificación ambiental calculada a partir de las emisiones)
 -- =====================================================
 
-INSERT INTO dim_sustainability
+INSERT OR IGNORE INTO dim_sustainability
 (sustainability_level)
 
 VALUES
@@ -113,17 +121,14 @@ ORDER BY food_product;
 
 -- =====================================================
 -- 8 FACT TABLE
--- =====================================================
--- =====================================================
--- 8. CARGA DE LA TABLA DE HECHOS
+-- CARGA DE LA TABLA DE HECHOS
 -- =====================================================
 -- Mediante una CTE clasificamos cada alimento según:
 -- • Categoría
 -- • Origen
 -- • Nivel de sostenibilidad
---
--- Después relacionamos esas clasificaciones con las
--- tablas dimensión para obtener las claves foráneas.
+
+-- Después relacionamos esas clasificaciones con las tablas dimensión para obtener las claves foráneas.
 -- =====================================================
 
 WITH classified_food AS (
@@ -135,7 +140,6 @@ SELECT s.*,
 ----------------------------------------------------
 
 	CASE
-	
 		WHEN food_product IN
 		('Beef (beef herd)',
 		'Beef (dairy herd)',
@@ -211,64 +215,78 @@ SELECT s.*,
 		THEN 'Beverages'
 		
 		ELSE 'Other'
-	
 	END AS category,
 
 ----------------------------------------------------
--- ORIGEN
+-- ORIGEN (Animal; Vegetal)
 ----------------------------------------------------
 
-	CASE
-		WHEN food_product IN
-		(
-		'Beef (beef herd)',
-		'Beef (dairy herd)',
-		'Lamb & Mutton',
-		'Pig Meat',
-		'Poultry Meat',
-		'Milk',
-		'Cheese',
-		'Eggs',
-		'Fish (farmed)',
-		'Shrimps (farmed)'
-		)
-		THEN 'Animal'
-		ELSE 'Plant'
-	END AS origin,
+CASE
+	WHEN food_product IN
+	('Beef (beef herd)',
+	'Beef (dairy herd)',
+	'Lamb & Mutton',
+	'Pig Meat',
+	'Poultry Meat',
+	'Milk',
+	'Cheese',
+	'Eggs',
+	'Fish (farmed)',
+	'Shrimps (farmed)')
+	THEN 'Animal'
+	ELSE 'Plant'
+END AS origin,
 
 ----------------------------------------------------
 -- SOSTENIBILIDAD
-----------------------------------------------------
+	
+/*El dataset no incluye una clasificación del nivel de sostenibilidad.
+-- Por ello se crea una variable derivada utilizando las emisiones totales de CO₂ (kg CO₂e por kg de alimento). 
+-- Los umbrales se han definido con fines analíticos para facilitar la comparación entre alimentos.
 
-	CASE
-		WHEN total_emissions >20
-		THEN 'Very High'
-		WHEN total_emissions >10
-		THEN 'High'
-		WHEN total_emissions >5
-		THEN 'Medium'
-		ELSE 'Low'
-	END AS sustainability
+SELECT
+MIN(total_emissions) AS minimo,
+MAX(total_emissions) AS maximo,
+AVG(total_emissions) AS media;
+
+-- Con esto vemos el rango de valores en cuanto a emisiones de CO₂, y en bae a eso, definimos un umbral
+-- (No existe un estándar internacional que diga que un alimento es "alto" o "bajo" a partir de X kg CO₂e/kg.)*/
+
+CASE
+    WHEN total_emissions < 5
+    THEN 'Low'
+
+    WHEN total_emissions >= 5
+    AND total_emissions < 10
+    THEN 'Medium'
+
+    WHEN total_emissions >= 10
+    AND total_emissions < 20
+    THEN 'High'
+
+    ELSE 'Very High'
+
+END AS sustainability
 FROM staging_food s
 )
 
 INSERT INTO fact_environmental_impact
 (
-	product_id,
-	category_id,
-	origin_id,
-	system_id,
-	sustainability_id,
-	land_use_change,
-	animal_feed,
-	farm,
-	processing,
-	transport,
-	packaging,
-	retail,
-	total_emissions,
-	land_use,
-	water_use
+product_id,
+category_id,
+origin_id,
+system_id,
+sustainability_id,
+land_use_change,
+animal_feed,
+farm,
+processing,
+transport,
+packaging,
+retail,
+total_emissions,
+land_use,
+water_use
 )
 
 SELECT
@@ -290,6 +308,7 @@ SELECT
 FROM classified_food cf
 
 -- Hacemos INNER JOIN con las dimensiones para obtener los IDs numéricos (Foreign Keys).
+
 INNER JOIN dim_product p ON cf.food_product=p.product_name
 
 INNER JOIN dim_category c ON cf.category=c.category_name

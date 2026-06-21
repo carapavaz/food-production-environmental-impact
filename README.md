@@ -72,8 +72,6 @@ Contiene todas las métricas ambientales.
 * dim_system - Clasifica los alimentos según sistema de producción
 * dim_sustainability - Clasifica cada alimento según el nivel de emisiones de CO₂
 
-Este modelo permite separar la información descriptiva de las métricas cuantitativas, facilitando tanto el mantenimiento como el análisis posterior.
-
 ---
 
 # Granularidad
@@ -81,7 +79,6 @@ Este modelo permite separar la información descriptiva de las métricas cuantit
 ## fact_environmental_impact
 
 Cada fila representa el impacto ambiental asociado a la producción de un único alimento.
-
 Contiene las métricas:
 
 * emisiones totales
@@ -102,34 +99,16 @@ Además de las claves foráneas que enlazan con las dimensiones.
 El proyecto se divide en tres scripts:
 
 ## 01_schema.sql
-
 Creación del modelo relacional.
 
-Incluye:
-
-* Tabla staging.
-* Tabla de hechos.
-* Cinco dimensiones.
-* Índices.
-* Restricciones de integridad.
-
 ## 02_data.sql
-
 Carga de los datos desde la tabla staging.
-
-Posteriormente:
-
-* Se rellenan las dimensiones.
-* Se clasifican los alimentos mediante CASE.
-* Se generan las relaciones entre dimensiones y tabla de hechos mediante INNER JOIN.
-* Se realizan operaciones UPDATE para simular cambios en el sistema de producción.
 
 ---
 
 # Análisis Exploratorio de Datos (EDA)
 
 Durante el análisis se utilizaron las principales funcionalidades vistas durante el módulo de SQL.
-
 Entre ellas:
 
 * COUNT

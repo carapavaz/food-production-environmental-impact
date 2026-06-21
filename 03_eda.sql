@@ -11,24 +11,12 @@ GROUP BY food_product
 HAVING COUNT(*)>1;
 
 /* ==========================================================
--- ¿Cuántos alimentos contiene el dataset?
+-- ¿Cuántos alimentos contiene el dataset? (Verificamos que son 43)
 ============================================================*/
 
 SELECT COUNT(*) AS total_foods
 FROM fact_environmental_impact;
 
---------------------------------------------------------------
--- ==========================================================
--- LEFT JOIN
--- Verifica si existen categorías sin alimentos asociados.
--- ==========================================================
-
-SELECT
-	c.category_name,
-	COUNT(f.fact_id) total_products
-FROM dim_category c
-LEFT JOIN fact_environmental_impact f ON c.category_id=f.category_id
-GROUP BY c.category_name;
 --------------------------------------------------------------
 
 /* ==========================================================
